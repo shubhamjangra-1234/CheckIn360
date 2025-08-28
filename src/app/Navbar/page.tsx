@@ -9,7 +9,15 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // null = loading
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  interface User {
+  _id: string;
+  name: string;
+  email: string;
+  company?: string;
+  number?: string;
+  role: string;   // "admin" | "user"
+}
+  const [user, setUser] = useState<User | null>(null);  // ✅ type-safe
 
   // Check auth via cookie by calling your userData API
   const checkAuth = useCallback(async () => {
@@ -72,9 +80,14 @@ export default function Navbar() {
         window.dispatchEvent(new Event("auth-changed"));
         router.push("/login");
       }
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    console.error("Logout failed:", err.message);
+  } else {
+    console.error("Logout failed:", err);
+  }
+}
+
   };
 
   return (

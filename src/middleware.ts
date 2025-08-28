@@ -31,7 +31,8 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/attendance", request.nextUrl));
       }
 
-    } catch (err) {
+    } catch (err:unknown) {
+      console.log("JWT verification failed:", err);
       return NextResponse.redirect(new URL("/login", request.nextUrl));
     }
   }

@@ -7,14 +7,28 @@ function getUserFromToken(req: NextRequest): { id: string; role: string } | null
   const token = req.cookies.get("token")?.value; // ✅ simpler than manual split
 
   if (!token) return null;
-
+  interface JwtPayload {
+    id: string;
+    role: string;
+    iat?: number;
+    exp?: number;
+  }
   try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!); // ✅ use same secret as login
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET!
+    ) as JwtPayload; // ✅ cast to our interface
+
     return { id: decoded.id, role: decoded.role };
-  } catch (err) {
-    console.error("❌ JWT verification failed:", err);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error("❌ JWT verification failed:", err.message);
+    } else {
+      console.error("❌ JWT verification failed:", err);
+    }
     return null;
   }
+
 }
 
 // POST → Mark Check-in (Users only)
@@ -46,11 +60,20 @@ export async function POST(req: NextRequest) {
     await attendance.save();
 
     return NextResponse.json({ success: true, message: "Check-in marked", attendance }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, message: String(error) },
+      { status: 500 }
+    );
   }
 }
-
 // PUT → Mark Check-out (Users only)
 export async function PUT(req: NextRequest) {
   try {
@@ -81,9 +104,20 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, message: "Check-out marked", attendance: updated }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, message: String(error) },
+      { status: 500 }
+    );
   }
+
 }
 
 // GET → Fetch all attendance (Admin only)
@@ -98,7 +132,10 @@ export async function GET(req: NextRequest) {
 
     const records = await Attendance.find().populate("user", "name email company number");
     return NextResponse.json({ success: true, records });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ success: false, message: String(error) }, { status: 500 });
   }
 }

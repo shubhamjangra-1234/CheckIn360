@@ -17,7 +17,7 @@ export default function Login() {
   const onLogin = async (e:React.FormEvent) => {
   e.preventDefault();
   try {
-    const response = await axios.post(
+    await axios.post(
       "/api/users/login",
       user,
       { withCredentials: true } // ✅ allow cookies to be stored
@@ -26,7 +26,7 @@ export default function Login() {
 
     toast.success("Login successful");
     router.push("/attendance");
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log("Login error:", error);
     toast.error("Login failed. Please try again.");
   }

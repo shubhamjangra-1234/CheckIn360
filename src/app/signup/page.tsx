@@ -8,9 +8,15 @@ import toast from "react-hot-toast";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<SignupErrors>({});
   const router = useRouter();
-
+type SignupErrors = {
+  name?: string;
+  email?: string;
+  company?: string;
+  number?: string;
+  password?: string;
+};
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -21,7 +27,7 @@ export default function Signup() {
 
   // ✅ Validation rules
   const validate = () => {
-    let newErrors: any = {};
+    const newErrors: SignupErrors = {};
 
     if (!user.name.trim()) newErrors.name = "Name is required";
 
@@ -49,10 +55,10 @@ export default function Signup() {
     if (!validate()) return;
 
     try {
-      const res = await axios.post("/api/users/signup", user);
+     await axios.post("/api/users/signup", user);
       toast.success("Account Created");
       router.push("/attendance");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Signup failed", error);
       toast.error("Signup failed. Please try again.");
     }

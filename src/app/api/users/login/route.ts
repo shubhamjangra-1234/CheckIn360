@@ -75,12 +75,18 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
+  if (error instanceof Error) {
     console.error("Login error:", error.message);
-    return NextResponse.json(
-      { success: false, message: "Internal Server Error" },
-      { status: 500 }
-    );
+  } else {
+    console.error("Login error:", error);
   }
+
+  return NextResponse.json(
+    { success: false, message: "Internal Server Error" },
+    { status: 500 }
+  );
+}
+
 }
 

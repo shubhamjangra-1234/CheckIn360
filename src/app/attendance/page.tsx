@@ -2,8 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-
 import {
   Camera,
   CheckCircle,
@@ -22,13 +20,18 @@ export default function Attendance() {
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [selfieDisabled, setSelfieDisabled] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [refreshRecords, setRefreshRecords] = useState(false);
-
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  company?: string;
+  number?: string;
+  role?: string;
+}
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const router = useRouter();
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -43,7 +46,7 @@ export default function Attendance() {
         } else {
           console.log("Not logged in:", data.message);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error fetching user:", err);
       }
     };
@@ -79,7 +82,7 @@ export default function Attendance() {
         const data = await res.json();
 
         if (res.ok) {
-          const todayRecord = data.records.find((r: any) => r.date === today);
+          const todayRecord = data.records.find((r: Record<string, unknown>) => r.date === today);
 
           if (todayRecord) {
             if (!todayRecord.checkOut) {
@@ -95,9 +98,11 @@ export default function Attendance() {
             }
           }
         }
-      } catch (err) {
-        console.error("Error fetching attendance:", err);
-      }
+      } catch (err: unknown) {
+  console.error("Error fetching attendance:", err);
+  toast.error("Something went wrong");
+}
+
     };
 
     fetchTodayAttendance();
@@ -112,9 +117,10 @@ export default function Attendance() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-    } catch (err) {
-      toast.error("Camera access denied");
-    }
+    } catch {
+  toast.error("Camera access denied");
+}
+
   };
 
   // ✅ Stop camera
@@ -212,10 +218,16 @@ export default function Attendance() {
           toast.error(data.message || "Failed to check out");
         }
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong");
-    }
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    console.error("Unexpected error:", err.message, err.stack);
+  } else {
+    console.error("Unexpected error:", err);
+  }
+
+  toast.error("Something went wrong");
+}
+
   };
 
 
