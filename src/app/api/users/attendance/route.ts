@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
-import Attendance from "@/Models/Attendance";
+import Attendance from "@/models/attendance";
 import jwt from "jsonwebtoken";
 
 function getUserFromToken(req: NextRequest): { id: string; role: string } | null {

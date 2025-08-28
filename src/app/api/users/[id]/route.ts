@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
-import Attendance from "@/Models/Attendance";
+import Attendance from "@/models/attendance";
 import mongoose from "mongoose";
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
